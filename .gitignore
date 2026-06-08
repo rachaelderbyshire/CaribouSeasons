@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.Rproj
+Datasets/
+Results/
+Seasons_workspace.RData
+CaribouSeasons.Rproj
