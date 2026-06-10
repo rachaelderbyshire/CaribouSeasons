@@ -1,7 +1,7 @@
 #Assign behaviour data to season#######################
 
 #code written by Rachael Derbyshire: rderbysh@uoguelph.ca
-#UPDATED June 2026
+#2025-2026
 
 #I would like to define season on an annual basis based on movement parameters and the space occupied by individuals
 #Using code described for package "seasonality"
