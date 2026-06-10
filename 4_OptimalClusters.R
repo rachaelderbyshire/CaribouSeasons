@@ -1,7 +1,7 @@
 #K-means clustering: determine optimal number of clusters##############
 
 #code written by Rachael Derbyshire: rderbysh@uoguelph.ca
-#UPDATED June 2026
+#2025-2026
 
 #I would like to define season on an annual basis based on movement parameters and the space occupied by individuals
 #To do this, use fuzzy clustering methods, as described by Basille et al.
