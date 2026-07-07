@@ -25,10 +25,13 @@ projcrs_ssn<-"EPSG:3978"
 #Parturition results
 Par_Results<-read.csv("Datasets/ParResults2_06Mar2026.csv")
 head(Par_Results)
+length(unique(Par_Results$unique.x.FID.))
+length(unique(Par_Results$unique.x.Year.))
 
 #Caribou location data
 dat_all_cl<-fread("Datasets/dat_all_cl_04Mar2026.csv")
 head(dat_all_cl)
+length(unique(dat_all_cl$FID))
 
 #Province boundary (not actually needed, useful for visualizing data)
 ON_path <- "Datasets/Environment/Province/Province.shp"
@@ -65,7 +68,9 @@ head(Par_Results_calved)
 #new time columns
 dat_all_cl$single_date <- as.Date(dat_all_cl$t_)
 dat_all_cl$Year <- format(dat_all_cl$single_date, "%Y")
+length(unique(dat_all_cl$Year))
 dat_all_cl$FID_Year<-paste(dat_all_cl$FID, dat_all_cl$Year, sep = "_")
+length(unique(dat_all_cl$FID_Year))
 head(dat_all_cl)
 
 Par_Results_calved$FID_Year<-paste(Par_Results_calved$unique.x.FID., 
