@@ -92,7 +92,8 @@ rm(SED_track_list)
 
 #How many GPS points across how many individuals?
 data_25hr_all<-rbind(rbindlist(MIG_track_25hr), rbindlist(SED_track_25hr))
-table(data_25hr_all$id)
+nrow(data_25hr_all)
+length(table(data_25hr_all$id))
 
 
 #names, dates, and year vectors needed for analysis-----
