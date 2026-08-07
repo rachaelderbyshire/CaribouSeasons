@@ -74,7 +74,7 @@ for (j in 1:length(yearSED)){
   
   assign(list_name, result, envir = .GlobalEnv )
 }
-toc()#558.55 sec elapsed
+toc()#625.95 sec elapsed
 
 #for migratory dataset
 for (j in 1:length(yearMIG)){
@@ -133,7 +133,7 @@ for (j in 1:length(yearSED)){
   
   assign(list_name, result, envir = .GlobalEnv )
 }
-toc()#2848.06 sec elapsed
+toc()#5691.3 sec elapsed
 
 tic()#to figure out how long this takes
 for (j in 1:length(yearMIG)){
@@ -147,7 +147,7 @@ for (j in 1:length(yearMIG)){
   
   assign(list_name, result, envir = .GlobalEnv )
 }
-toc()#725.98 sec elapsed (4976.08 sec elapsed without memoise function)
+toc()#1600.17 sec elapsed (4976.08 sec elapsed without memoise function)
 
 
 #Incorporate habitat data------
@@ -165,7 +165,7 @@ plot(SCANFI_crop)
 
 tic()
 SCANFI_proj<-project(SCANFI_crop, "EPSG:3978", method="near")#this takes a long time
-toc()#3166.17 sec elapsed
+toc()#3776.21 sec elapsed
 plot(SCANFI_proj)#make sure it worked
 crs(SCANFI_proj)
 
@@ -247,7 +247,7 @@ for(i in 1:length(hab_type)){
     assign(list_name, result, envir = .GlobalEnv )
   }
 }
-toc()#19180.45 sec elapsed
+toc()#13926.87 sec elapsed
 
 for(i in 1:length(hab_type)){
   for (j in 1:length(yearMIG)){
@@ -316,7 +316,7 @@ for (j in 1:length(yearSED)){
   
   assign(list_name, result, envir = .GlobalEnv )
 }
-toc()#1287.28 sec elapsed
+toc()#5050.88 sec elapsed
 
 for (j in 1:length(yearMIG)){
   list_name<-paste("HBDistMig", yearMIG[j], sep="")
