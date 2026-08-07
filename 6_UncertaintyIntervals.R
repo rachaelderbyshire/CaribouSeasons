@@ -26,7 +26,6 @@ Table_func<-function(simple_seasons, weights, dates, Year){
 }
 
 Table2009s<-Table_func(seasonsbs_simple2009s, weights2009s, as.character(all_mean2009s$single_date), 2009)
-View(Table2009s)
 Table2010s<-Table_func(seasonsbs_simple2010s, weights2010s, as.character(all_mean2010s$single_date), 2010)
 Table2011s<-Table_func(seasonsbs_simple2011s, weights2011s, as.character(all_mean2011s$single_date), 2011)
 Table2012s<-Table_func(seasonsbs_simple2012s, weights2012s, as.character(all_mean2012s$single_date), 2012)
@@ -34,12 +33,15 @@ Table2019s<-Table_func(seasonsbs_simple2019s, weights2019s, as.character(all_mea
 Table2020s<-Table_func(seasonsbs_simple2020s, weights2020s, as.character(all_mean2020s$single_date), 2020)
 Table2021s<-Table_func(seasonsbs_simple2021s, weights2021s, as.character(all_mean2021s$single_date), 2021)
 Table2022s<-Table_func(seasonsbs_simple2022s, weights2022s, as.character(all_mean2022s$single_date), 2022)
+TableAlls<-rbind(Table2009s, Table2010s, Table2011s, Table2012s, Table2019s, Table2020s, 
+                 Table2021s, Table2022s)
 
 Table2009m<-Table_func(seasonsbs_simple2009m, weights2009m, as.character(all_mean2009m$single_date), 2009)
 Table2020m<-Table_func(seasonsbs_simple2020m, weights2020m, as.character(all_mean2020m$single_date), 2020)
 Table2021m<-Table_func(seasonsbs_simple2021m, weights2021m, as.character(all_mean2021m$single_date), 2021)
 Table2022m<-Table_func(seasonsbs_simple2022m, weights2022m, as.character(all_mean2022m$single_date), 2022)
 Table2023m<-Table_func(seasonsbs_simple2023m, weights2023m, as.character(all_mean2023m$single_date), 2023)
+TableAllm<-rbind(Table2009m, Table2020m, Table2021m, Table2022m, Table2023m)
 
 ###Create function to calculate 90% window of certainty in season dates ----
 
@@ -105,55 +107,55 @@ SeasonUncertainty<-function(x, PerUncert=0.1, Year, Ecotype){#"PerCert" = Percen
 
 SeasonInt2009s<-SeasonUncertainty(x=Table2009s, Year=2009, Ecotype="Sed")
 SeasonInt2009s
-write.csv(SeasonInt2009s, "Results/SeasonIntervals/SeasonIntSed2009_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2009s, "Results/SeasonIntervals/SeasonIntSed2009_06Aug2026.csv", row.names = F)
 
 SeasonInt2010s<-SeasonUncertainty(x=Table2010s, Year=2010, Ecotype="Sed")
 SeasonInt2010s
-write.csv(SeasonInt2010s, "Results/SeasonIntervals/SeasonIntSed2010_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2010s, "Results/SeasonIntervals/SeasonIntSed2010_06Aug2026.csv", row.names = F)
 
 SeasonInt2011s<-SeasonUncertainty(x=Table2011s, Year=2011, Ecotype="Sed")
 SeasonInt2011s
-write.csv(SeasonInt2011s, "Results/SeasonIntervals/SeasonIntSed2011_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2011s, "Results/SeasonIntervals/SeasonIntSed2011_06Aug2026.csv", row.names = F)
 
 SeasonInt2012s<-SeasonUncertainty(x=Table2012s, Year=2012, Ecotype="Sed")
 SeasonInt2012s
-write.csv(SeasonInt2012s, "Results/SeasonIntervals/SeasonIntSed2012_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2012s, "Results/SeasonIntervals/SeasonIntSed2012_06Aug2026.csv", row.names = F)
 
 SeasonInt2019s<-SeasonUncertainty(x=Table2019s, Year=2019, Ecotype="Sed")
 SeasonInt2019s
-write.csv(SeasonInt2019s, "Results/SeasonIntervals/SeasonIntSed2019_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2019s, "Results/SeasonIntervals/SeasonIntSed2019_06Aug2026.csv", row.names = F)
 
 SeasonInt2020s<-SeasonUncertainty(x=Table2020s, Year=2020, Ecotype="Sed")
 SeasonInt2020s
-write.csv(SeasonInt2020s, "Results/SeasonIntervals/SeasonIntSed2020_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2020s, "Results/SeasonIntervals/SeasonIntSed2020_06Aug2026.csv", row.names = F)
 
 SeasonInt2021s<-SeasonUncertainty(x=Table2021s, Year=2021, Ecotype="Sed")
 SeasonInt2021s
-write.csv(SeasonInt2021s, "Results/SeasonIntervals/SeasonIntSed2021_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2021s, "Results/SeasonIntervals/SeasonIntSed2021_06Aug2026.csv", row.names = F)
 
 SeasonInt2022s<-SeasonUncertainty(x=Table2022s, Year=2022, Ecotype="Sed")
 SeasonInt2022s
-write.csv(SeasonInt2022s, "Results/SeasonIntervals/SeasonIntSed2022_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2022s, "Results/SeasonIntervals/SeasonIntSed2022_06Aug2026.csv", row.names = F)
 
 SeasonInt2009m<-SeasonUncertainty(x=Table2009m, Year=2009, Ecotype="Mig")
 SeasonInt2009m
-write.csv(SeasonInt2009m, "Results/SeasonIntervals/SeasonIntMig2009_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2009m, "Results/SeasonIntervals/SeasonIntMig2009_06Aug2026.csv", row.names = F)
 
 SeasonInt2020m<-SeasonUncertainty(x=Table2020m, Year=2020, Ecotype="Mig")
 SeasonInt2020m
-write.csv(SeasonInt2020m, "Results/SeasonIntervals/SeasonIntMig2020_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2020m, "Results/SeasonIntervals/SeasonIntMig2020_06Aug2026.csv", row.names = F)
 
 SeasonInt2021m<-SeasonUncertainty(x=Table2021m, Year=2021, Ecotype="Mig")
 SeasonInt2021m
-write.csv(SeasonInt2021m, "Results/SeasonIntervals/SeasonIntMig2021_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2021m, "Results/SeasonIntervals/SeasonIntMig2021_06Aug2026.csv", row.names = F)
 
 SeasonInt2022m<-SeasonUncertainty(x=Table2022m, Year=2022, Ecotype="Mig")
 SeasonInt2022m
-write.csv(SeasonInt2022m, "Results/SeasonIntervals/SeasonIntMig2022_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2022m, "Results/SeasonIntervals/SeasonIntMig2022_06Aug2026.csv", row.names = F)
 
 SeasonInt2023m<-SeasonUncertainty(x=Table2023m, Year=2023, Ecotype="Mig")
 SeasonInt2023m
-write.csv(SeasonInt2023m, "Results/SeasonIntervals/SeasonIntMig2023_16Mar2026.csv", row.names = F)
+write.csv(SeasonInt2023m, "Results/SeasonIntervals/SeasonIntMig2023_06Aug2026.csv", row.names = F)
 
 #######
 save.image(file = "Seasons_workspace.RData")
