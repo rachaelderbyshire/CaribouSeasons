@@ -29,7 +29,7 @@ length(unique(Par_Results$unique.x.FID.))
 length(unique(Par_Results$unique.x.Year.))
 
 #Caribou location data
-dat_all_cl<-fread("Datasets/dat_all_cl_04Mar2026.csv")
+dat_all_cl<-fread("Datasets/dat_all_cl_04Aug2026.csv")
 head(dat_all_cl)
 length(unique(dat_all_cl$FID))
 
@@ -58,18 +58,17 @@ str(dat_all_cl)
 dat_all_cl$fullTime<-as.POSIXct(dat_all_cl$t_, 
                                        format = "%Y-%m-%d %H:%M:%S",
                                        tz="UTC")
-str(Par_Results_calved)
-Par_Results_calved$fullTime<-as.POSIXct(Par_Results_calved$BP1c, #BP1 = Breakpoint 1 (first breakpoint in movement model)
+summary(Par_Results_calved)
+Par_Results_calved$fullTime<-as.POSIXct(ifelse(Par_Results_calved$BM==1, Par_Results_calved$BP1c, Par_Results_calved$BP2c),
                                        format = "%Y-%m-%d %H:%M",
                                        tz="UTC")
-head(Par_Results_calved)
 
 #Create FID_Year column for both datasets
 #new time columns
-dat_all_cl$single_date <- as.Date(dat_all_cl$t_)
-dat_all_cl$Year <- format(dat_all_cl$single_date, "%Y")
-length(unique(dat_all_cl$Year))
-dat_all_cl$FID_Year<-paste(dat_all_cl$FID, dat_all_cl$Year, sep = "_")
+dat_all_cl<-dat_all_cl %>% mutate(single_date=as.Date(t_)) %>% 
+  mutate(Year=format(single_date, "%Y")) %>% 
+  mutate(FID_Year = paste(FID, Year, sep="_"))
+
 length(unique(dat_all_cl$FID_Year))
 head(dat_all_cl)
 
@@ -79,35 +78,53 @@ Par_Results_calved$FID_Year<-paste(Par_Results_calved$unique.x.FID.,
 head(Par_Results_calved)
 
 #Create matching time columns for ParResults to match with larger location df
-Par_Results_calved$single_date<-as.Date(Par_Results_calved$BP1c)
+Par_Results_calved$single_date<-as.Date(Par_Results_calved$fullTime)
 
-#Use inner join to join datasets
+#Use inner join to join with GPS dataset
 Par_Results_loc<-Par_Results_calved %>%
   left_join(dat_all_cl, by = 'FID_Year', suffix = c('.1', '.2')) %>%
   group_by(FID_Year) %>%
   filter(abs(single_date.1 - single_date.2) == min(abs(single_date.1 - single_date.2)))#this just ensures that I don't get every possible combination of dates from both datasets 
-nrow(Par_Results_loc)
-
-#Some will be missing from final dataset because times in dates are missing
-#Pull out NAs to filter separately
-Par_Results_NA<-subset(Par_Results_loc, is.na(fullTime.1)==T)
-
-#For those that had NAs in fullTime, select single point for that day
-Par_Results_NA<-Par_Results_NA%>%distinct(FID_Year, .keep_all = T)
-nrow(Par_Results_NA)
+summary(Par_Results_loc)
 
 #Filter the rest by fulltime so I have only one point per day
 Par_Results_loc<-Par_Results_loc %>%
   filter(abs(fullTime.1 - fullTime.2) == min(abs(fullTime.1 - fullTime.2)))#take the time from dat_all_cl that is closest to the birth time in ParResult 
 nrow(Par_Results_loc)
+summary(Par_Results_loc)
+
+#Some caribou missing from final dataset because times in dates are missing
+#Pull out NAs to filter separately
+#then repeat left join with GPS data
+summary(Par_Results_calved)
+Par_Results_NA<-subset(Par_Results_calved, is.na(fullTime)==T)
+
+Par_Results_NA$fullTime<-as.POSIXct(ifelse(Par_Results_NA$BM==1, Par_Results_NA$BP1c, Par_Results_NA$BP2c),
+                                    format = "%Y-%m-%d",
+                                    tz="UTC")
+Par_Results_NA$single_date<-as.Date(Par_Results_NA$fullTime)
+View(Par_Results_NA)
+
+#Use inner join to join datasets
+Par_Results_locNA<-Par_Results_NA %>%
+  left_join(dat_all_cl, by = 'FID_Year', suffix = c('.1', '.2')) %>%
+  group_by(FID_Year) %>%
+  filter(abs(single_date.1 - single_date.2) == min(abs(single_date.1 - single_date.2)))#this just ensures that I don't get every possible combination of dates from both datasets 
+summary(Par_Results_locNA)
+
+#Filter the rest by fulltime so I have only one point per day
+Par_Results_locNA<-Par_Results_locNA %>%
+  filter(abs(fullTime.1 - fullTime.2) == min(abs(fullTime.1 - fullTime.2)))#take the time from dat_all_cl that is closest to the birth time in ParResult 
+nrow(Par_Results_locNA)
+summary(Par_Results_locNA)
 
 #Combine the two
-Par_Results_loc<-rbind(Par_Results_loc, Par_Results_NA)
+Par_Results_loc<-rbind(Par_Results_loc, Par_Results_locNA)
 length(unique(Par_Results_loc$FID_Year))
 
 Par_Results_loc<-ungroup(Par_Results_loc)
 summary(Par_Results_loc)
-write.csv(Par_Results_loc, "Results/Par_Results_loc_06Mar2026.csv", row.names = F)
+write.csv(Par_Results_loc, "Results/Par_Results_loc_04Aug2026.csv", row.names = F)
 
 
 #Plot this on a map!!!----
@@ -115,7 +132,7 @@ write.csv(Par_Results_loc, "Results/Par_Results_loc_06Mar2026.csv", row.names = 
 Par_Results_loc.sf<-st_as_sf(Par_Results_loc, coords=c("x_", "y_"), 
                                      crs=projcrs_part)
 
-#reproject into new CRS (better for subsequent analysis)
+#reproject into new CRS (better for plotting on map)
 Par_Results_loc.sf<-st_transform(Par_Results_loc.sf, projcrs_ssn)
 str(Par_Results_loc.sf)
 crs(Par_Results_loc.sf)
@@ -187,7 +204,7 @@ points(Par_Results_tr,
      col=as.numeric(as.factor(Par_Results_tr$Ecotype)),
      pch=19) 
 head(Par_Results_tr)
-write.csv(Par_Results_tr, "Results/Par_Results_tr_09Apr2026.csv")#this has parturition locs and ecotypes
+write.csv(Par_Results_tr, "Results/Par_Results_tr_04Aug2026.csv")#this has parturition locs and ecotypes
 
 #Any switchers? ----
 Switchers<-table(Par_Results_tr$FID, Par_Results_tr$Ecotype)
@@ -231,7 +248,7 @@ length(unique(dat_all_eco$FID_Year))#same number as Par_Results_calved (therefor
 #save time stamps as.character so they save properly
 dat_all_eco$fullTime<-as.character(format(dat_all_eco$fullTime))
 
-write.csv(dat_all_eco, "Results/dat_all_eco_06Mar2026.csv", row.names = F)
+write.csv(dat_all_eco, "Results/dat_all_eco_04Aug2026.csv", row.names = F)
 
 
 #First day of calving for each ecotype ----
@@ -252,7 +269,7 @@ SedCalving<-as.data.frame(SedCalving)
 names(SedCalving)<-c("Year", "CalvingStart")
 SedCalving$CalvingStart<-as.POSIXct(SedCalving$CalvingStart)
 str(SedCalving)
-write.csv(SedCalving, "Results/SedCalvingStart.csv", row.names = F)
+write.csv(SedCalving, "Results/SedCalvingStart_04Aug2026.csv", row.names = F)
 
 MigCalving<-matrix(NA, 5, 2)
 MigCalving[,1]<-c(2009, 2020, 2021, 2022, 2023)
@@ -267,7 +284,7 @@ MigCalving<-as.data.frame(MigCalving)
 names(MigCalving)<-c("Year", "CalvingStart")
 MigCalving$CalvingStart<-as.POSIXct(MigCalving$CalvingStart)
 str(MigCalving)
-write.csv(MigCalving, "Results/MigCalvingStart.csv", row.names = F)
+write.csv(MigCalving, "Results/MigCalvingStart_04Aug2026.csv", row.names = F)
 
 #General parturition statistics ----
 #Not necessarily needed, just for data exploration
