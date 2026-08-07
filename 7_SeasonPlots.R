@@ -39,7 +39,7 @@ for(i in 1:nrow(SeasonIntWide)){
   }
 }
 View(SeasonIntWide)
-write.csv(SeasonIntWide, "Results/SeasonIntervals/SeasonIntWide_16Mar2026.csv")
+write.csv(SeasonIntWide, "Results/SeasonIntervals/SeasonIntWide_06Aug2026.csv")
 
 ####Put all timelines within same year ------
 #all dates need to be in same year in order to plot properly
@@ -96,69 +96,32 @@ dates2009<-function(x, Year){
   return(x)
 }
 
-#first, subset data by ecotype and year:
-#Start with sedentary
+#For season intervals:
+#first, subset data by ecotype:
 SedSeasons<-subset(SeasonIntWide, Ecotype=="Sed")
-SedSeasons09<-subset(SedSeasons, Year=="2009")
-SedSeasons10<-subset(SedSeasons, Year=="2010")
-SedSeasons11<-subset(SedSeasons, Year=="2011")
-SedSeasons12<-subset(SedSeasons, Year=="2012")
-SedSeasons19<-subset(SedSeasons, Year=="2019")
-SedSeasons20<-subset(SedSeasons, Year=="2020")
-SedSeasons21<-subset(SedSeasons, Year=="2021")
-SedSeasons22<-subset(SedSeasons, Year=="2022")
+summary(SedSeasons)
 
-#Migratory population
 MigSeasons<-subset(SeasonIntWide, Ecotype=="Mig")
-MigSeasons09<-subset(MigSeasons, Year=="2009")
-MigSeasons20<-subset(MigSeasons, Year=="2020")
-MigSeasons21<-subset(MigSeasons, Year=="2021")
-MigSeasons22<-subset(MigSeasons, Year=="2022")
-MigSeasons23<-subset(MigSeasons, Year=="2023")
 
 #now fix dates
-SedSeasons09<-dates2009(x=SedSeasons09, Year=2009)#still do this for 2009 so I can combine datasets more easily
-SedSeasons10<-dates2009(SedSeasons10, 2010)
-SedSeasons11<-dates2009(SedSeasons11, 2011)
-SedSeasons12<-dates2009(SedSeasons12, 2012)
-SedSeasons19<-dates2009(x=SedSeasons19, Year=2019)
-SedSeasons19
-SedSeasons20<-dates2009(SedSeasons20, 2020)
-SedSeasons21<-dates2009(SedSeasons21, 2021)
-SedSeasons22<-dates2009(SedSeasons22, 2022)
+dataSED<-list()
+for(i in as.character(unique(SedSeasons$Year))){
+  dataSED[[i]]<-try(dates2009(x=subset(SedSeasons, Year==i), Year=i))
+}
+View(dataSED)
 
-MigSeasons09<-dates2009(MigSeasons09, 2009)
-MigSeasons20<-dates2009(MigSeasons20, 2020)
-MigSeasons21<-dates2009(MigSeasons21, 2021)
-MigSeasons22<-dates2009(MigSeasons22, 2022)
-MigSeasons23<-dates2009(MigSeasons23, 2023)
+dataMIG<-list()
+for(i in as.character(unique(MigSeasons$Year))){
+  dataMIG[[i]]<-try(dates2009(x=subset(MigSeasons, Year==i), Year=i))
+}
+View(dataMIG)
 
 #combine the dataframes
-dataSED<-rbind(SedSeasons09, SedSeasons10, SedSeasons11, SedSeasons12, 
-               SedSeasons19, SedSeasons20, SedSeasons21, SedSeasons22)
+dataSED<-rbindlist(dataSED)
+dataMIG<-rbindlist(dataMIG)
 
-dataMIG<-rbind(MigSeasons09, MigSeasons20, MigSeasons21, MigSeasons22, MigSeasons23)
 
-#Plot it! -----
-
-#first, get calving date df set up
-#SedCalving dataset from ParturitionLocationAndEcotype script
-SedCalving.2009<-read.csv("Results/SedCalvingStart.csv")
-head(SedCalving.2009)
-SedCalving.2009$CalvingStart<-as.POSIXct(SedCalving.2009$CalvingStart)
-year(SedCalving.2009$CalvingStart)<-2010
-SedCalving.2009
-
-#Migratory population
-#MigCalving dataset from ParturitionLocationAndEcotype script
-MigCalving.2009<-read.csv("Results/MigCalvingStart.csv")
-MigCalving.2009$CalvingStart<-as.POSIXct(MigCalving.2009$CalvingStart)
-year(MigCalving.2009$CalvingStart)<-2010
-MigCalving.2009
-
-#Try plotting the way that bsPlot does it
-bsPlot(seasonsbs_simple2009m, seasons2009m, weights2009m, title = "Mig 2009")
-
+#Next, for daily weights data:
 #format data so it's all within the same year (necessary for plotting)
 dates2009_2<-function(x, Year){
   x$Date<-as.POSIXct(x$Date)
@@ -171,30 +134,42 @@ dates2009_2<-function(x, Year){
   return(x)
 }
 
-head(Table2009s)
-Table2009s<-dates2009_2(Table2009s, Year=2009)
-Table2010s<-dates2009_2(Table2010s, Year=2010)
-Table2011s<-dates2009_2(Table2011s, Year=2011)
-Table2012s<-dates2009_2(Table2012s, Year=2012)
-Table2019s<-dates2009_2(Table2019s, Year=2019)
-Table2020s<-dates2009_2(Table2020s, Year=2020)
-Table2021s<-dates2009_2(Table2021s, Year=2021)
-Table2022s<-dates2009_2(Table2022s, Year=2022)
+#now fix dates
+str(TableAlls)##from 6_UncertaintyIntervals
+TableAlls2009<-list()
+for(i in as.character(unique(TableAlls$Year))){
+  TableAlls2009[[i]]<-try(dates2009_2(x=subset(TableAlls, Year==i), Year=i))
+}
+View(TableAlls2009)
+TableAlls2009<-rbindlist(TableAlls2009)
 
-TableAlls<-rbind(Table2009s, Table2010s, Table2011s, Table2012s, Table2019s, Table2020s, 
-                 Table2021s, Table2022s)
+TableAllm2009<-list()
+for(i in as.character(unique(TableAllm$Year))){
+  TableAllm2009[[i]]<-try(dates2009_2(x=subset(TableAllm, Year==i), Year=i))
+}
+TableAllm2009<-rbindlist(TableAllm2009)
 
-Table2009m<-dates2009_2(Table2009m, Year=2009)
-head(Table2009m)
-Table2020m<-dates2009_2(Table2020m, Year=2020)
-Table2021m<-dates2009_2(Table2021m, Year=2021)
-Table2022m<-dates2009_2(Table2022m, Year=2022)
-Table2023m<-dates2009_2(Table2023m, Year=2023)
 
-TableAllm<-rbind(Table2009m, Table2020m, Table2021m, Table2022m, Table2023m)
+#get calving date df set up
+#SedCalving dataset from ParturitionLocationAndEcotype script
+SedCalving.2009<-read.csv("Results/SedCalvingStart_04Aug2026.csv")
+head(SedCalving.2009)
+SedCalving.2009$CalvingStart<-as.POSIXct(SedCalving.2009$CalvingStart)
+year(SedCalving.2009$CalvingStart)<-2010#so they can be plotted together on same timeline
+SedCalving.2009
+
+#Migratory population
+#MigCalving dataset from ParturitionLocationAndEcotype script
+MigCalving.2009<-read.csv("Results/MigCalvingStart_04Aug2026.csv")
+MigCalving.2009$CalvingStart<-as.POSIXct(MigCalving.2009$CalvingStart)
+year(MigCalving.2009$CalvingStart)<-2010
+MigCalving.2009
+
+
+#Plot it! -----
 
 #Put together the plot!
-SedPlot<-ggplot(TableAlls, aes(x=Date.2009, y=1, colour = weights))+
+SedPlot<-ggplot(TableAlls2009, aes(x=Date.2009, y=1, colour = weights))+
   geom_col(width=1)+
   facet_grid(Year~.)+
   theme_classic()+
@@ -213,7 +188,7 @@ SedPlot<-SedPlot+geom_segment(data=dataSED,
   ungeviz::geom_vpline(data=dataSED, aes(x = Date.mid.2009, y=0.5), colour="black", height=0.2)
 SedPlot
 
-MigPlot<-ggplot(TableAllm, aes(x=Date.2009, y=1, colour = weights))+
+MigPlot<-ggplot(TableAllm2009, aes(x=Date.2009, y=1, colour = weights))+
   geom_col(width=1)+
   facet_grid(Year~.)+#, nrow=5, scales="free_y", dir="v")+
   theme_classic()+
