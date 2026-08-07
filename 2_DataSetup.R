@@ -23,7 +23,7 @@ projcrs_part<-crs("+proj=longlat +datum=WGS84 +no_defs")
 projcrs_ssn<-3978
 
 #Set up data----
-dat_all_eco<-fread("Results/dat_all_eco_06Mar2026.csv")
+dat_all_eco<-fread("Results/dat_all_eco_04Aug2026.csv")
 head(dat_all_eco)
 
 #re-name confusing columns
