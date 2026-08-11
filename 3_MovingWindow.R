@@ -14,6 +14,7 @@ load("Seasons_workspace.RData")
 
 #Load required packages
 library(amt)
+library(data.table)
 library(memoise)
 library(rlist)
 library(runner)
