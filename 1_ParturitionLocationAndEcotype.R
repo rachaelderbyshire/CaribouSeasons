@@ -302,7 +302,7 @@ hist(Par_Results_loc$MonthDay, breaks=60)
 #how much earlier than average did CMS027 have her calf in 2020?
 #calculate percentile of observation
 ecdf_func <- ecdf(Par_Results_loc$MonthDay)
-percentile_rank <- ecdf_func(Par_Results_loc$MonthDay[325]) * 100
+percentile_rank <- ecdf_func(Par_Results_loc$MonthDay[326]) * 100
 
 #mean number of births per individual
 ParMean<-Par_Results_calved %>%
