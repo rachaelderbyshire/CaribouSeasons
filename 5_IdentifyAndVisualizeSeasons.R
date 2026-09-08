@@ -389,14 +389,16 @@ sBoxplotJJ <- function(data, seasons, temporal = TRUE, months = c("rectangles","
           plot(as.numeric(row.names(datatmp)), datatmp[, i],
                type = "n", xlim = c(1, 365), ylim = range(datarb[, i]),
                axes = FALSE, 
-               main = gsub("\\D+", "", names(datatmp)[i])
+               #main = gsub("\\D+", "", names(datatmp)[i]) #use if I want plot titles to be years
+               main = names(datatmp)[i]
                )
           par(usr = c(1, 365, min(datarb[, i]), max(datarb[, i])))
         } else {
           plot(as.numeric(row.names(datatmp)), datatmp[, i],
                type = "n", xlim = c(1, 365), ylim = range(datatmp[, i]),
                axes = FALSE, 
-               main = gsub("\\D+", "", names(datatmp)[i])
+               main = names(datatmp)[i]
+               #main = gsub("\\D+", "", names(datatmp)[i])
                )
           par(usr = c(1, 365, min(datatmp[, i]), max(datatmp[, i])))
         }
@@ -433,9 +435,9 @@ sBoxplotJJ <- function(data, seasons, temporal = TRUE, months = c("rectangles","
              tick = FALSE, line = 0, cex.axis = 1.5)
         # --------------------------------
         
-        if (cluster)
-          axis(3, at = at, labels = seas, tick = FALSE,
-               line = -1, cex.axis = 1.5)
+        #if (cluster)
+         # axis(3, at = at, labels = seas, tick = FALSE,
+          #     line = -1, cex.axis = 1.5)
         
         box()
       }
@@ -447,14 +449,15 @@ sBoxplotJJ <- function(data, seasons, temporal = TRUE, months = c("rectangles","
       seasonstmp <- seasons[[j]]
       for (i in 1:ncol(datatmp)) {
         boxplot(datatmp[, i] ~ seasonstmp, axes = FALSE,
-                main = gsub("\\D+", "", names(datatmp)[i]), 
+                main = names(datatmp)[i],
+                #main = gsub("\\D+", "", names(datatmp)[i]), 
                 ylim = c(0, 1))
         axis(1)
         box()
       }
     }
   }
-}#NOTE: I used chatGPT to help make this function
+}
 
 #need to re-order dataframe so it's Jul-June
 JulJune<-function(x){
@@ -491,13 +494,12 @@ sBoxplotJJ(JulJune(cariwindow2021s), JulJune(seasonsbs_simple2021s))
 sBoxplotJJ(JulJune(cariwindow2022s), JulJune(seasonsbs_simple2022s))
 
 #To plot only a single variable at a time:
-PlotData<-JulJune(cariwindow2009m)
+PlotData<-JulJune(cariwindow2022s)
 sBoxplotJJ(
-    data = PlotData[, "HBDistMig2009", drop = FALSE],
-    seasons = JulJune(seasonsbs_simple2009m),
+    data = PlotData[, "SpeedSed2022", drop = FALSE],
+    seasons = JulJune(seasonsbs_simple2022s),
     cluster=F
-    )#This does not create a ggplot object
-#Which is very annoying...
+    )
 
 #######
 save.image(file = "Seasons_workspace.RData")
