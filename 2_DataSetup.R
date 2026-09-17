@@ -23,7 +23,7 @@ projcrs_part<-crs("+proj=longlat +datum=WGS84 +no_defs")
 projcrs_ssn<-3978
 
 #Set up data----
-dat_all_eco<-fread("Results/dat_all_eco_04Aug2026.csv")
+dat_all_eco<-fread("Results/dat_all_eco.csv")
 head(dat_all_eco)
 
 #re-name confusing columns
@@ -35,17 +35,11 @@ dat_all_eco_cl<-subset(dat_all_eco_cl, FID.x!="CMS027")
 
 #split by ecotype
 dat_all_MIG<-subset(dat_all_eco_cl, Ecotype=="MIG")
-head(dat_all_MIG)
-length(unique(dat_all_MIG$FID_Year))
 dat_all_SED<-subset(dat_all_eco_cl, Ecotype=="SED")
-length(unique(dat_all_SED$FID_Year))
 
 #split by caribou ID
-#NOTE: this is different from calving analysis, where I split by caribou-year
 MIG_list<-split(dat_all_MIG, dat_all_MIG$FID.x)
-length(MIG_list)
 SED_list<-split(dat_all_SED, dat_all_SED$FID.x)
-length(SED_list)
 
 #convert data to a track
 track_func<-function(x){
