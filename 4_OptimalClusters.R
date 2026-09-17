@@ -76,50 +76,42 @@ mean_function<-function(EcoYearList, daterange){
   return(result)
 }
 
-daterange_dfSED
-
-all_mean2009s<-mean_function(List2009s, daterange = daterange_dfSED[1,1])
-all_mean2010s<-mean_function(List2010s, daterange = daterange_dfSED[2,1])
-all_mean2011s<-mean_function(List2011s, daterange = daterange_dfSED[3,1])
-all_mean2012s<-mean_function(List2012s, daterange = daterange_dfSED[4,1])
-all_mean2013s<-mean_function(List2013s, daterange = daterange_dfSED[5,1])
-all_mean2019s<-mean_function(List2019s, daterange = daterange_dfSED[6,1])
-all_mean2020s<-mean_function(List2020s, daterange = daterange_dfSED[7,1])
-all_mean2021s<-mean_function(List2021s, daterange = daterange_dfSED[8,1])
-all_mean2022s<-mean_function(List2022s, daterange = daterange_dfSED[9,1])
-all_mean2023s<-mean_function(List2023s, daterange = daterange_dfSED[10,1])
+daterange_dfSED#double-check dates
+all_meanListSed<-list()
+ListAlls<-list(List2009s, List2010s, List2011s, List2012s, List2013s, List2019s,
+               List2020s, List2021s, List2022s, List2023s)
+for(i in 1:length(ListAlls)){
+  all_meanListSed[[i]]<-mean_function(ListAlls[[i]], daterange = daterange_dfSED[i,1])
+}
 
 #Data checks: make sure there is adequate data across entire ecological year
-View(all_mean2013s)#check each one to make sure there is data
+#for example:
+View(all_meanListSed[[5]])#check each one to make sure there is data
 summary(List2013s$StraightSed2013[300:365,])#these data don't extend the entire ecological year, which causes problems when trying to compute the gap statistic (below)
 #plus it probably doesn't make sense to include them if they don't span the entire year
 #so I will not include 2013 SED in subsequent analyses
-View(all_mean2019s)
+View(all_meanListSed[[6]])
 summary(List2019s$StraightSed2019[1:50,])#check there are multiple individuals from beginning of year
-View(all_mean2023s)
+View(all_meanListSed[[10]])
 summary(List2023s$StraightSed2023[360:365,])#still some individuals with data at end of this year (but very few);
 #this causes issues with clustering later on, and may not be a justifiable sample size
 #so, I will exclude
 
-#put together in a list (excluding 2013 and 2023 due to sample size issues)
-all_meanListSed<-list(all_mean2009s, all_mean2010s, all_mean2011s, all_mean2012s, 
-                      all_mean2019s, all_mean2020s, all_mean2021s, all_mean2022s)
-head(all_meanListSed[[2]])
+#exclude 2013 and 2023 due to sample size issues
+all_meanListSed<-all_meanListSed[-10] 
+all_meanListSed<-all_meanListSed[-5] 
 
 #repeat for migratory
 daterange_dfMIG
-all_mean2009m<-mean_function(List2009m, daterange = daterange_dfMIG[1,1])
-all_mean2010m<-mean_function(List2010m, daterange = daterange_dfMIG[2,1])
-all_mean2019m<-mean_function(List2019m, daterange = daterange_dfMIG[3,1])
-all_mean2020m<-mean_function(List2020m, daterange = daterange_dfMIG[4,1])
-all_mean2021m<-mean_function(List2021m, daterange = daterange_dfMIG[5,1])
-all_mean2022m<-mean_function(List2022m, daterange = daterange_dfMIG[6,1])
-all_mean2023m<-mean_function(List2023m, daterange = daterange_dfMIG[7,1])
+all_meanListMig<-list()
+ListAllm<-list(List2009m, List2010m, List2019m,
+               List2020m, List2021m, List2022m, List2023m)
+for(i in 1:length(ListAllm)){
+  all_meanListMig[[i]]<-mean_function(ListAllm[[i]], daterange = daterange_dfMIG[i,1])
+}
 
 #data checks
-summary(all_mean2023m)#check each one to make sure there is data
-View(List2009m$StraightMig2009)
-summary(all_mean2010m)#these data don't extend the entire ecological year, which causes problems when trying to compute the gap statistic (below)
+summary(all_meanListMig[[2]])#these data don't extend the entire ecological year, which causes problems when trying to compute the gap statistic (below)
 #plus it probably doesn't make sense to include them if they don't span the entire year
 #so I will not include 2010MIG in subsequent analyses
 View(List2019m$StraightMig2019)#Very few individuals extend entire eco year:
@@ -127,10 +119,9 @@ View(List2019m$StraightMig2019)#Very few individuals extend entire eco year:
 #so, I will exclude
 View(List2023m$StraightMig2023)
 
-#put in list (excluding 2010 and 2019 due to sample size issues)
-all_meanListMig<-list(all_mean2009m, all_mean2020m, all_mean2021m, 
-                      all_mean2022m, all_mean2023m)
-
+#exclude 2010 and 2019 due to sample size issues
+all_meanListMig<-all_meanListMig[-3] 
+all_meanListMig<-all_meanListMig[-2] 
 
 #Create dataframe to calculate optimal number of clusters for each year
 GG_Sed<-matrix(NA, 8, 2)
