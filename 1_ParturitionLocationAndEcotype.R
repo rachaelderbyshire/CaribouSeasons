@@ -23,15 +23,10 @@ projcrs_ssn<-"EPSG:3978"
 #datasets for analysis----
 
 #Parturition results
-Par_Results<-read.csv("Datasets/ParResults2_06Mar2026.csv")
-head(Par_Results)
-length(unique(Par_Results$unique.x.FID.))
-length(unique(Par_Results$unique.x.Year.))
+Par_Results<-read.csv("Datasets/ParResults.csv")
 
 #Caribou location data
-dat_all_cl<-fread("Datasets/dat_all_cl_04Aug2026.csv")
-head(dat_all_cl)
-length(unique(dat_all_cl$FID))
+dat_all_cl<-fread("Datasets/dat_all_cl.csv")
 
 #Province boundary (not actually needed, useful for visualizing data)
 ON_path <- "Datasets/Environment/Province/Province.shp"
@@ -42,23 +37,19 @@ ON_shp<-st_transform(ON_shp, crs=projcrs_ssn)
 
 #Ecoregions
 Eco_path <- "Datasets/Environment/Ecoregions/ecoregions.shp"
-Ecoregions <- vect(Eco_path)#used terra to read this to it is easier to use in amt
+Ecoregions <- vect(Eco_path)#used terra to read this so it is easier to use in amt
 Ecoregions<-project(Ecoregions, projcrs_ssn)
 plot(Ecoregions)
 plot(st_geometry(ON_shp), add=T, col="red")#make sure these line up
 
 
 #Create dataset of caribou that calved----
-head(Par_Results)
 Par_Results_calved<-subset(Par_Results, BM>0)#BM=0 means the "no change" movement model fit best
-length(unique(Par_Results_calved$unique.x.FID.))
 
 #Merge this dataset with GPS locs based on time/date stamp----
-str(dat_all_cl)
 dat_all_cl$fullTime<-as.POSIXct(dat_all_cl$t_, 
                                        format = "%Y-%m-%d %H:%M:%S",
                                        tz="UTC")
-summary(Par_Results_calved)
 Par_Results_calved$fullTime<-as.POSIXct(ifelse(Par_Results_calved$BM==1, Par_Results_calved$BP1c, Par_Results_calved$BP2c),
                                        format = "%Y-%m-%d %H:%M",
                                        tz="UTC")
@@ -69,13 +60,9 @@ dat_all_cl<-dat_all_cl %>% mutate(single_date=as.Date(t_)) %>%
   mutate(Year=format(single_date, "%Y")) %>% 
   mutate(FID_Year = paste(FID, Year, sep="_"))
 
-length(unique(dat_all_cl$FID_Year))
-head(dat_all_cl)
-
 Par_Results_calved$FID_Year<-paste(Par_Results_calved$unique.x.FID., 
                                    Par_Results_calved$unique.x.Year., 
                                    sep = "_")
-head(Par_Results_calved)
 
 #Create matching time columns for ParResults to match with larger location df
 Par_Results_calved$single_date<-as.Date(Par_Results_calved$fullTime)
@@ -85,18 +72,15 @@ Par_Results_loc<-Par_Results_calved %>%
   left_join(dat_all_cl, by = 'FID_Year', suffix = c('.1', '.2')) %>%
   group_by(FID_Year) %>%
   filter(abs(single_date.1 - single_date.2) == min(abs(single_date.1 - single_date.2)))#this just ensures that I don't get every possible combination of dates from both datasets 
-summary(Par_Results_loc)
 
 #Filter the rest by fulltime so I have only one point per day
 Par_Results_loc<-Par_Results_loc %>%
   filter(abs(fullTime.1 - fullTime.2) == min(abs(fullTime.1 - fullTime.2)))#take the time from dat_all_cl that is closest to the birth time in ParResult 
 nrow(Par_Results_loc)
-summary(Par_Results_loc)
 
 #Some caribou missing from final dataset because times in dates are missing
 #Pull out NAs to filter separately
 #then repeat left join with GPS data
-summary(Par_Results_calved)
 Par_Results_NA<-subset(Par_Results_calved, is.na(fullTime)==T)
 
 Par_Results_NA$fullTime<-as.POSIXct(ifelse(Par_Results_NA$BM==1, Par_Results_NA$BP1c, Par_Results_NA$BP2c),
@@ -110,32 +94,27 @@ Par_Results_locNA<-Par_Results_NA %>%
   left_join(dat_all_cl, by = 'FID_Year', suffix = c('.1', '.2')) %>%
   group_by(FID_Year) %>%
   filter(abs(single_date.1 - single_date.2) == min(abs(single_date.1 - single_date.2)))#this just ensures that I don't get every possible combination of dates from both datasets 
-summary(Par_Results_locNA)
 
 #Filter the rest by fulltime so I have only one point per day
 Par_Results_locNA<-Par_Results_locNA %>%
   filter(abs(fullTime.1 - fullTime.2) == min(abs(fullTime.1 - fullTime.2)))#take the time from dat_all_cl that is closest to the birth time in ParResult 
 nrow(Par_Results_locNA)
-summary(Par_Results_locNA)
 
 #Combine the two
 Par_Results_loc<-rbind(Par_Results_loc, Par_Results_locNA)
-length(unique(Par_Results_loc$FID_Year))
+length(unique(Par_Results_loc$FID_Year))#should be the same as the number of caribou-years
 
 Par_Results_loc<-ungroup(Par_Results_loc)
-summary(Par_Results_loc)
-write.csv(Par_Results_loc, "Results/Par_Results_loc_04Aug2026.csv", row.names = F)
+write.csv(Par_Results_loc, "Results/Par_Results_loc.csv", row.names = F)
 
 
 #Plot this on a map!!!----
-#Not necessarily needed, just for data visualization and exploration
+#Not necessarily needed, just for data visualization 
 Par_Results_loc.sf<-st_as_sf(Par_Results_loc, coords=c("x_", "y_"), 
                                      crs=projcrs_part)
 
 #reproject into new CRS (better for plotting on map)
 Par_Results_loc.sf<-st_transform(Par_Results_loc.sf, projcrs_ssn)
-str(Par_Results_loc.sf)
-crs(Par_Results_loc.sf)
 
 plot(st_geometry(ON_shp))
 plot(st_geometry(Par_Results_loc.sf), add=T)
@@ -144,12 +123,10 @@ plot(st_geometry(Par_Results_loc.sf), add=T)
 #Extract ecoregion----
 
 #first, convert dataset to a track
-head(Par_Results_loc)
 Par_Results_tr<-make_track(Par_Results_loc, x_, y_, fullTime.2, #This is the time from dat_all_cl (associated with GPS point)
                            crs=st_crs(projcrs_part),
                            FID=FID, Year=Year, single_date=single_date.1, region=region,
                            BM=BM)
-head(Par_Results_tr)
 
 #re-project into new CRS (better for doing distance calculations)
 Par_Results_tr<-transform_coords(Par_Results_tr, crs_to = st_crs(3978))
@@ -160,7 +137,6 @@ get_crs(Par_Results_tr)
 summary(Par_Results_tr)
 r<-rast(xmin=51000, xmax=1204000, ymin=131000, ymax=775000)
 Ecoregions.r<-terra::rasterize(Ecoregions, r, field="ECOREGION")
-Ecoregions.r
 plot(Ecoregions.r)
 points(Par_Results_tr)
 
@@ -170,7 +146,6 @@ summary(Par_Results_tr)
 
 #Merge ecoregion names
 Ecoregion_table<-as.data.frame(Ecoregions)
-head(Ecoregion_table)
 table(Par_Results_tr$ECOREGION)
 
 Ecoregion_table2<-Ecoregion_table[,5:6]#select only ECOREGION and REGION_NAM
@@ -202,9 +177,9 @@ plot(Ecoregions.r)
 plot(Ecoregions, add=T)
 points(Par_Results_tr,
      col=as.numeric(as.factor(Par_Results_tr$Ecotype)),
-     pch=19) 
-head(Par_Results_tr)
-write.csv(Par_Results_tr, "Results/Par_Results_tr_04Aug2026.csv")#this has parturition locs and ecotypes
+     pch=19)
+
+write.csv(Par_Results_tr, "Results/Par_Results_tr.csv")#this has parturition locs and ecotypes
 
 #Any switchers? ----
 Switchers<-table(Par_Results_tr$FID, Par_Results_tr$Ecotype)
@@ -232,15 +207,10 @@ CMS027_par<-subset(Par_Results_tr, FID=="CMS027")
 tot_dist(CMS027_par)/1000
 
 #Add ecotype designation to larger dataset ----
-head(dat_all_cl)
-head(Par_Results_tr)
-
 Par_Results_tr$FID_Year<-paste(Par_Results_tr$FID, Par_Results_tr$Year,
                                   sep="_")#so I have a column to join with
 
 dat_all_eco<-left_join(dat_all_cl, Par_Results_tr, by="FID_Year")
-head(dat_all_eco)
-summary(dat_all_eco)
 dat_all_eco<-dat_all_eco[!is.na(dat_all_eco$Ecotype),]#remove caribou that did not receive ecotype designation (because no calving)
 length(unique(dat_all_eco$FID_Year))#same number as Par_Results_calved (therefore we got all caribou that calved)
 
@@ -248,43 +218,38 @@ length(unique(dat_all_eco$FID_Year))#same number as Par_Results_calved (therefor
 #save time stamps as.character so they save properly
 dat_all_eco$fullTime<-as.character(format(dat_all_eco$fullTime))
 
-write.csv(dat_all_eco, "Results/dat_all_eco_04Aug2026.csv", row.names = F)
+write.csv(dat_all_eco, "Results/dat_all_eco.csv", row.names = F)
 
 
 #First day of calving for each ecotype ----
 #create dataframe with min value for each year for seasonality analysis
 SedCalving<-matrix(NA, 8, 2)
 SedCalving[,1]<-c(2009, 2010, 2011, 2012, 2019, 2020, 2021, 2022)
-SedCalving[1,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2009 & Ecotype == "SED")$single_date)))
-SedCalving[2,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2010 & Ecotype == "SED")$single_date)))
-SedCalving[3,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2011 & Ecotype == "SED")$single_date)))
-SedCalving[4,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2012 & Ecotype == "SED")$single_date)))
-SedCalving[5,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2019 & Ecotype == "SED")$single_date)))
-SedCalving[6,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2020 & Ecotype == "SED")$single_date)))
-SedCalving[7,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2021 & Ecotype == "SED")$single_date)))
-SedCalving[8,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2022 & Ecotype == "SED")$single_date)))
+for(i in 1:8){
+  SedCalving[i,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == SedCalving[i,1] & Ecotype == "SED")$single_date)))
+}
 SedCalving
 
 SedCalving<-as.data.frame(SedCalving)
 names(SedCalving)<-c("Year", "CalvingStart")
 SedCalving$CalvingStart<-as.POSIXct(SedCalving$CalvingStart)
 str(SedCalving)
-write.csv(SedCalving, "Results/SedCalvingStart_04Aug2026.csv", row.names = F)
+write.csv(SedCalving, "Results/SedCalvingStart.csv", row.names = F)
 
 MigCalving<-matrix(NA, 5, 2)
 MigCalving[,1]<-c(2009, 2020, 2021, 2022, 2023)
-MigCalving[1,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2009 & Ecotype == "MIG")$single_date)))
-MigCalving[2,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2020 & Ecotype == "MIG")$single_date)))
-MigCalving[3,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2021 & Ecotype == "MIG")$single_date)))
-MigCalving[4,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2022 & Ecotype == "MIG")$single_date)))
-MigCalving[5,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == 2023 & Ecotype == "MIG")$single_date)))
+for(i in 1:5){
+  MigCalving[i,2]<-as.character(as.POSIXct(min(subset(Par_Results_tr, Year == MigCalving[i,1] & Ecotype == "MIG")$single_date)))
+}
 MigCalving
 
 MigCalving<-as.data.frame(MigCalving)
 names(MigCalving)<-c("Year", "CalvingStart")
 MigCalving$CalvingStart<-as.POSIXct(MigCalving$CalvingStart)
 str(MigCalving)
-write.csv(MigCalving, "Results/MigCalvingStart_04Aug2026.csv", row.names = F)
+write.csv(MigCalving, "Results/MigCalvingStart.csv", row.names = F)
+
+#####End of Main Script#########
 
 #General parturition statistics ----
 #Not necessarily needed, just for data exploration
@@ -313,4 +278,5 @@ ParMean<-Par_Results_calved %>%
     se_events = sd(n_events) / sqrt(n())
   )
 
-#####End of Main Script#########
+
+####End of script#####
